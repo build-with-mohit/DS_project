@@ -1,6 +1,13 @@
 [
   {
     "id": 51,
+    "action": "book_added",
+    "details": "Added 'Harry Potter' (ISBN: 9794563257865) to catalog.",
+    "isbn": "9794563257865",
+    "timestamp": "2026-10-14T16:33:15.733821+00:00"
+  },
+  {
+    "id": 51,
     "action": "book_issued",
     "details": "Issued 'Database System Concepts' to Mohit.",
     "isbn": "9780078022159",
@@ -341,12 +348,5 @@
     "details": "Returned 'Algorithms 4th Edition' back to catalog shelves.",
     "isbn": "9780321573513",
     "timestamp": "2026-10-13T21:33:36.993915+00:00"
-  },
-  {
-    "id": 37,
-    "action": "book_issued",
-    "details": "Issued 'Algorithms 4th Edition' to Kavita Rao.",
-    "isbn": "9780321573513",
-    "timestamp": "2026-10-13T21:33:36.984764+00:00"
   }
 ]

@@ -106,5 +106,17 @@
     "availability_status": "Available",
     "issued_to": "",
     "added_at": "2026-10-14T16:23:58.801228+00:00"
+  },
+  {
+    "isbn": "9794563257865",
+    "title": "Harry Potter",
+    "author": "Kenneth H. Rosen",
+    "category": "Programming",
+    "publication_year": 2026,
+    "publisher": "Bloomsbury",
+    "description": "Full of Fantasy",
+    "availability_status": "Available",
+    "issued_to": "",
+    "added_at": "2026-10-14T16:33:15.729732+00:00"
   }
 ]
