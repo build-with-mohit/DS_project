@@ -19,8 +19,8 @@
     "publication_year": 2008,
     "publisher": "Prentice Hall",
     "description": "Essential principles, patterns, and practices of writing clean, maintainable software.",
-    "availability_status": "Available",
-    "issued_to": "",
+    "availability_status": "Issued",
+    "issued_to": "Aarav Sharma",
     "added_at": "2026-09-05T11:30:00Z"
   },
   {
@@ -72,6 +72,18 @@
     "added_at": "2026-09-18T10:00:00Z"
   },
   {
+    "isbn": "9780078022159",
+    "title": "Database System Concepts",
+    "author": "Abraham Silberschatz, Henry F. Korth, S. Sudarshan",
+    "category": "Database Management",
+    "publication_year": 2019,
+    "publisher": "McGraw-Hill",
+    "description": "Covers relational algebra, SQL optimization, transaction isolation, and NoSQL systems.",
+    "availability_status": "Issued",
+    "issued_to": "Mohit",
+    "added_at": "2026-09-20T12:00:00Z"
+  },
+  {
     "isbn": "9781259676512",
     "title": "Discrete Mathematics and Its Applications",
     "author": "Kenneth H. Rosen",
@@ -84,15 +96,15 @@
     "added_at": "2026-09-22T08:30:00Z"
   },
   {
-    "isbn": "9794563257865",
-    "title": "Harry Potter",
-    "author": "J.K.Rowling",
-    "category": "Literature",
-    "publication_year": 1997,
+    "isbn": "9780131103627",
+    "title": "Hello",
+    "author": "Kenneth H. Rosen",
+    "category": "Programming",
+    "publication_year": 2026,
     "publisher": "Bloomsbury",
-    "description": "full of fantasy",
+    "description": "Fantacy",
     "availability_status": "Available",
     "issued_to": "",
-    "added_at": "2026-10-13T22:27:48.266680+00:00"
+    "added_at": "2026-10-14T16:23:58.801228+00:00"
   }
 ]
