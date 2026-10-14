@@ -1,0 +1,352 @@
+[
+  {
+    "id": 51,
+    "action": "book_deleted",
+    "details": "Removed 'Database System Concepts' (ISBN: 9780078022159) from library catalog.",
+    "isbn": "9780078022159",
+    "timestamp": "2026-10-13T22:45:24.070506+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_returned",
+    "details": "Returned 'Database System Concepts' back to catalog shelves.",
+    "isbn": "9780078022159",
+    "timestamp": "2026-10-13T22:32:44.292787+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_returned",
+    "details": "Returned 'Clean Code: A Handbook of Agile Software Craftsmanship' back to catalog shelves.",
+    "isbn": "9780132350884",
+    "timestamp": "2026-10-13T22:32:22.794090+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_issued",
+    "details": "Issued 'Database System Concepts' to Mohit Patil.",
+    "isbn": "9780078022159",
+    "timestamp": "2026-10-13T22:32:01.678077+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_added",
+    "details": "Added 'Harry Potter' (ISBN: 9794563257865) to catalog.",
+    "isbn": "9794563257865",
+    "timestamp": "2026-10-13T22:27:48.271877+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_deleted",
+    "details": "Removed 'Test ISBN-10 with X Check Digit' (ISBN: 080442957X) from library catalog.",
+    "isbn": "080442957X",
+    "timestamp": "2026-10-13T22:19:13.702285+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_added",
+    "details": "Added 'Test ISBN-10 with X Check Digit' (ISBN: 080442957X) to catalog.",
+    "isbn": "080442957X",
+    "timestamp": "2026-10-13T22:19:13.695966+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_deleted",
+    "details": "Removed 'Test 979 Prefix Book' (ISBN: 9791090636071) from library catalog.",
+    "isbn": "9791090636071",
+    "timestamp": "2026-10-13T22:19:01.063966+00:00"
+  },
+  {
+    "id": 51,
+    "action": "book_added",
+    "details": "Added 'Test 979 Prefix Book' (ISBN: 9791090636071) to catalog.",
+    "isbn": "9791090636071",
+    "timestamp": "2026-10-13T22:19:01.038369+00:00"
+  },
+  {
+    "id": 50,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.087730+00:00"
+  },
+  {
+    "id": 49,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.077815+00:00"
+  },
+  {
+    "id": 48,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.072995+00:00"
+  },
+  {
+    "id": 47,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.061883+00:00"
+  },
+  {
+    "id": 46,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.051529+00:00"
+  },
+  {
+    "id": 45,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.038808+00:00"
+  },
+  {
+    "id": 44,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.026666+00:00"
+  },
+  {
+    "id": 43,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.018782+00:00"
+  },
+  {
+    "id": 42,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.014214+00:00"
+  },
+  {
+    "id": 41,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.006648+00:00"
+  },
+  {
+    "id": 40,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:37.001487+00:00"
+  },
+  {
+    "id": 39,
+    "action": "book_deleted",
+    "details": "Removed 'Algorithms 4th Edition' (ISBN: 9780321573513) from library catalog.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:36.997503+00:00"
+  },
+  {
+    "id": 38,
+    "action": "book_returned",
+    "details": "Returned 'Algorithms 4th Edition' back to catalog shelves.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:36.993915+00:00"
+  },
+  {
+    "id": 37,
+    "action": "book_issued",
+    "details": "Issued 'Algorithms 4th Edition' to Kavita Rao.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:36.984764+00:00"
+  },
+  {
+    "id": 36,
+    "action": "book_added",
+    "details": "Added 'Algorithms 4th Edition' (ISBN: 9780321573513) to catalog.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:36.980391+00:00"
+  },
+  {
+    "id": 35,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.975991+00:00"
+  },
+  {
+    "id": 34,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.971327+00:00"
+  },
+  {
+    "id": 33,
+    "action": "book_added",
+    "details": "Added 'Algorithms 4th Edition' (ISBN: 9780321573513) to catalog.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:36.961973+00:00"
+  },
+  {
+    "id": 32,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.957703+00:00"
+  },
+  {
+    "id": 31,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.952428+00:00"
+  },
+  {
+    "id": 30,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.944955+00:00"
+  },
+  {
+    "id": 29,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.940690+00:00"
+  },
+  {
+    "id": 28,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:36.932222+00:00"
+  },
+  {
+    "id": 27,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.180341+00:00"
+  },
+  {
+    "id": 26,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.169795+00:00"
+  },
+  {
+    "id": 25,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.165528+00:00"
+  },
+  {
+    "id": 24,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.158117+00:00"
+  },
+  {
+    "id": 23,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.153205+00:00"
+  },
+  {
+    "id": 22,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.146201+00:00"
+  },
+  {
+    "id": 21,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.141631+00:00"
+  },
+  {
+    "id": 20,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.134456+00:00"
+  },
+  {
+    "id": 19,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.129749+00:00"
+  },
+  {
+    "id": 18,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.122452+00:00"
+  },
+  {
+    "id": 17,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.117712+00:00"
+  },
+  {
+    "id": 16,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.042503+00:00"
+  },
+  {
+    "id": 15,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.036484+00:00"
+  },
+  {
+    "id": 14,
+    "action": "book_added",
+    "details": "Added 'Algorithms 4th Edition' (ISBN: 9780321573513) to catalog.",
+    "isbn": "9780321573513",
+    "timestamp": "2026-10-13T21:33:20.026712+00:00"
+  },
+  {
+    "id": 13,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.022125+00:00"
+  },
+  {
+    "id": 12,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.017195+00:00"
+  },
+  {
+    "id": 11,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.009564+00:00"
+  },
+  {
+    "id": 10,
+    "action": "system_reset",
+    "details": "Catalog database reset to standard seed records.",
+    "isbn": "",
+    "timestamp": "2026-10-13T21:33:20.004831+00:00"
+  }
+]
