@@ -179,3 +179,54 @@ def test_persistence_reload():
         found, _, _ = m2.linked_list.search_book("9780131103627")
         assert found is not None
         assert found.title == "The C Programming Language"
+
+
+def test_api_root_and_health_alias():
+    res_root = client.get("/")
+    assert res_root.status_code == 200
+    assert res_root.json()["status"] == "ok"
+    assert "docs_url" in res_root.json()
+
+    res_health_alias = client.get("/health")
+    assert res_health_alias.status_code == 200
+    assert res_health_alias.json()["status"] == "ok"
+
+
+def test_cors_preflight_production_and_preview():
+    # Production Vercel domain preflight
+    res_prod = client.options("/api/books", headers={
+        "Origin": "https://ds-project-olive.vercel.app",
+        "Access-Control-Request-Method": "GET",
+    })
+    assert res_prod.headers.get("access-control-allow-origin") == "https://ds-project-olive.vercel.app"
+
+    # Preview Vercel domain preflight
+    res_prev = client.options("/api/books", headers={
+        "Origin": "https://ds-project-git-preview-test.vercel.app",
+        "Access-Control-Request-Method": "POST",
+    })
+    assert res_prev.headers.get("access-control-allow-origin") == "https://ds-project-git-preview-test.vercel.app"
+
+
+def test_database_persistence_mode():
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "test_catalog.db"
+        db_url = f"sqlite:///{db_path}"
+        sm = StorageManager(database_url=db_url)
+        assert sm.storage_mode == "database"
+        assert sm.linked_list.count_books() >= 1
+
+        sm.linked_list.insert_book({
+            "isbn": "9780131103627",
+            "title": "The C Programming Language",
+            "author": "Brian W. Kernighan",
+            "category": "Programming",
+            "publication_year": 1988,
+        })
+        sm.persist_linked_list()
+
+        sm2 = StorageManager(database_url=db_url)
+        node, _, _ = sm2.linked_list.search_book("9780131103627")
+        assert node is not None
+        assert node.title == "The C Programming Language"
+

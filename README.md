@@ -249,7 +249,7 @@ cd "c:\Users\Mohit Vinayak Patil\Downloads\library managment system"
 
 ## 10. Automated Testing Instructions
 
-The project includes an automated test suite executed with `pytest`, covering all 21 test scenarios specified in the requirements:
+The project includes an automated test suite executed with `pytest`, covering all 24 unit and integration test scenarios:
 
 ```powershell
 # Run the complete test suite from project root:
@@ -273,10 +273,57 @@ python -m pytest backend/tests/ -v
 14. `test_persistence_reload`: Verifies data integrity across simulated application restarts.
 15. `test_api_dashboard_stats`: Confirms accurate math computed dynamically from list.
 16. `test_api_export_csv`: Validates CSV headers and mime type.
+17. `test_api_root_and_health_alias`: Validates `/` discovery endpoint and `/health` alias.
+18. `test_cors_preflight_production_and_preview`: Tests CORS response headers for production and preview domains.
+19. `test_database_persistence_mode`: Validates database synchronization with SQLite and PostgreSQL schemas.
+20. `test_serverless_tmp_directory_mode`: Simulates Vercel read-only filesystem and verifies `/tmp` fallback writes.
 
 ---
 
-## 11. Practical Examination & Viva Questions
+## 11. Production Deployment Guide (Vercel)
+
+LIBRIX is configured out-of-the-box for **Unified Full-Stack Deployment** on [Vercel](https://vercel.com) using a single repository project:
+- **Frontend (React 18 + Vite)**: Built into `frontend/dist` and served statically at `/` (and client-side sub-routes).
+- **Backend (FastAPI ASGI)**: Served as serverless functions via `api/index.py` handling `/api/*`, `/docs`, `/openapi.json`, and `/health`.
+
+---
+
+### Step-by-Step Deployment (Unified Full-Stack)
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New...** -> **Project**.
+2. Import your GitHub repository: `build-with-mohit/DS_project`.
+3. In the **Configure Project** screen:
+   - **Root Directory**: Leave as `./` (repository root default).
+   - **Framework Preset**: Leave as default / **Other**.
+   - **Build and Output Settings**: Automatically read from `vercel.json` and root `package.json`:
+     - *Build Command*: `cd frontend && npm install && npm run build`
+     - *Output Directory*: `frontend/dist`
+4. **Environment Variables** (Optional):
+   - `DATABASE_URL`: *(Optional)* Free PostgreSQL connection string from [Supabase](https://supabase.com) or [Neon](https://neon.tech) if you want catalog changes to persist across serverless container cold starts.
+     *If omitted, LIBRIX runs in serverless demo mode using `/tmp/librix_data` with standard academic textbooks automatically initialized.*
+5. Click **Deploy**.
+
+---
+
+### How Vercel Routes Traffic
+- **`https://your-domain.vercel.app/`** ➜ Serves Vite React application (`frontend/dist/index.html`).
+- **`https://your-domain.vercel.app/catalog`**, `/search`, `/visualizer`, etc. ➜ Serves `index.html` via SPA rewrite rule (prevents 404 on refresh).
+- **`https://your-domain.vercel.app/api/*`** ➜ Routed to FastAPI Python backend (`api/index.py`).
+- **`https://your-domain.vercel.app/docs`** ➜ Interactive Swagger documentation.
+- **`https://your-domain.vercel.app/health`** ➜ Cloud health check endpoint.
+
+---
+
+### Key Production Enhancements Applied
+- **No Insecure Localhost Fallbacks**: In production, the client never falls back to `127.0.0.1:8000`, eliminating Mixed Content and connection refused errors.
+- **Client-Side Routing Rewrites**: `vercel.json` routes all paths (`/catalog`, `/visualizer`, `/reports`, etc.) to `/index.html` preventing 404s on browser reload.
+- **Serverless-Safe Persistence**: `backend/storage.py` detects serverless read-only filesystems and safely performs atomic JSON mutations in `/tmp/librix_data` without crashing.
+- **Database-Backed Option**: Optional `DATABASE_URL` allows connecting a cloud PostgreSQL/Supabase database while retaining pure Singly Linked List pointer operations in memory.
+- **Universal Vercel CORS**: `backend/main.py` permits `https://ds-project-olive.vercel.app` and all `*.vercel.app` preview branch deployments.
+
+---
+
+## 12. Practical Examination & Viva Questions
 
 ### Q1: Why use a Singly Linked List instead of a standard Array/Python list?
 **Answer**: In a Singly Linked List, memory allocation is dynamic and non-contiguous. Nodes are linked via reference pointers (`self.next`). Insertion at the head is $\mathcal{O}(1)$ without shifting subsequent elements, whereas in an array, inserting or deleting at index 0 requires shifting all $n$ subsequent elements ($\mathcal{O}(n)$ data movement). In LIBRIX, every operation strictly adheres to explicit pointer manipulation to demonstrate low-level computer science data structure mechanics.

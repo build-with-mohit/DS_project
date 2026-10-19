@@ -1,17 +1,23 @@
 """
 LIBRIX — Smart Library Catalog Management System
 FastAPI Backend Application
-Exposes REST APIs backed by a custom Singly Linked List and persistent JSON storage.
+Exposes REST APIs backed by a custom Singly Linked List and persistent storage.
+Supports unified fullstack and decoupled serverless deployments on Vercel.
 """
 
 import io
+import os
 import csv
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
-from fastapi import FastAPI, HTTPException, status, Query
+from fastapi import FastAPI, HTTPException, status, Query, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from linked_list import validate_isbn
 from models import (
@@ -32,30 +38,62 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configure CORS for local development
+# Configure CORS for local development, production Vercel deployment, and preview URLs
+default_origins = [
+    "https://ds-project-olive.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+env_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+allowed_origins = list(dict.fromkeys(default_origins + env_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.get("/api/health")
+@app.get("/")
+def root_info():
+    """Root service discovery endpoint."""
+    return {
+        "status": "ok",
+        "app": "LIBRIX API",
+        "description": "Smart Library Catalog Management System using Singly Linked List",
+        "version": "1.0.0",
+        "docs_url": "/docs",
+        "health_url": "/api/health",
+    }
+
+
+# Router for core API endpoints
+api_router = APIRouter()
+
+
+@api_router.get("/health")
 def health_check():
     """Health check endpoint."""
-    return {"status": "ok", "app": "LIBRIX", "version": "1.0.0"}
+    with _storage_lock:
+        storage_manager.sync_if_needed()
+        book_count = storage_manager.linked_list.count_books()
+    return {
+        "status": "ok",
+        "app": "LIBRIX",
+        "version": "1.0.0",
+        "storage_mode": getattr(storage_manager, "storage_mode", "json_file"),
+        "total_books": book_count,
+    }
 
 
-@app.get("/api/books", response_model=List[BookResponse])
+@api_router.get("/books", response_model=List[BookResponse])
 def get_all_books(
     category: Optional[str] = Query(None, description="Filter by category"),
     status_filter: Optional[str] = Query(None, alias="status", description="Filter by availability status"),
@@ -68,6 +106,7 @@ def get_all_books(
     Client can optionally filter or sort for presentation purposes.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         raw_books = storage_manager.linked_list.display_books()
 
     # Presentation filtering
@@ -95,34 +134,52 @@ def get_all_books(
     return filtered
 
 
-@app.post("/api/books", response_model=BookResponse, status_code=status.HTTP_201_CREATED)
-def add_new_book(book_in: BookCreate):
+@api_router.post("/books", response_model=BookResponse, status_code=status.HTTP_201_CREATED)
+def add_book(book_in: BookCreate):
     """
-    Validates ISBN (format & checksum), ensures uniqueness,
-    instantiates a new BookNode, appends to the Singly Linked List,
-    and atomically persists the list to JSON storage.
+    Appends a new book node to the tail of the Singly Linked List.
+    Validates ISBN-10/13 checksum and uniqueness.
+    Persists updated list to JSON storage.
     """
-    is_valid, cleaned_isbn, error_msg = validate_isbn(book_in.isbn)
+    # 1. Validate ISBN checksum
+    is_valid, cleaned_isbn, err_msg = validate_isbn(book_in.isbn)
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"ISBN Validation Error: {error_msg}"
+            detail=f"Invalid ISBN: {err_msg}",
         )
 
-    book_dict = book_in.model_dump()
-    book_dict["isbn"] = cleaned_isbn
-    book_dict["availability_status"] = "Available"
-    book_dict["issued_to"] = ""
-    book_dict["added_at"] = datetime.now(timezone.utc).isoformat()
-
+    # 2. Synchronized list insertion
     with _storage_lock:
+        storage_manager.sync_if_needed()
+        # Check uniqueness by traversing linked list
+        existing_node, _, _ = storage_manager.linked_list.search_book(cleaned_isbn)
+        if existing_node is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Book with ISBN '{cleaned_isbn}' already exists in the catalog ('{existing_node.title}').",
+            )
+
+        book_dict = {
+            "isbn": cleaned_isbn,
+            "title": book_in.title.strip(),
+            "author": book_in.author.strip(),
+            "category": book_in.category.strip() or "Other",
+            "publication_year": book_in.publication_year,
+            "publisher": (book_in.publisher or "").strip(),
+            "description": (book_in.description or "").strip(),
+            "availability_status": "Available",
+            "issued_to": "",
+            "added_at": datetime.now(timezone.utc).isoformat(),
+        }
+
         try:
             node = storage_manager.linked_list.insert_book(book_dict)
             storage_manager.persist_linked_list()
             storage_manager.log_activity(
                 action="book_added",
-                details=f"Added '{node.title}' (ISBN: {cleaned_isbn}) to catalog.",
-                isbn=cleaned_isbn,
+                details=f"Appended '{node.title}' (ISBN: {node.isbn}) to Singly Linked List.",
+                isbn=node.isbn,
             )
             return node.to_dict()
         except ValueError as ve:
@@ -131,7 +188,7 @@ def add_new_book(book_in: BookCreate):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to persist book: {str(e)}")
 
 
-@app.get("/api/books/search", response_model=SearchResponse)
+@api_router.get("/books/search", response_model=SearchResponse)
 def search_books(
     q: str = Query(..., min_length=1, description="Search query"),
     type: str = Query("all", description="Search type: isbn, title, author, category, or all"),
@@ -142,6 +199,7 @@ def search_books(
     """
     q_clean = q.strip()
     with _storage_lock:
+        storage_manager.sync_if_needed()
         if type == "isbn":
             # Direct linked list ISBN search algorithm
             node, steps, path = storage_manager.linked_list.search_book(q_clean)
@@ -155,24 +213,26 @@ def search_books(
                 "total_found": len(results),
             }
         else:
-            matches = storage_manager.linked_list.search_by_query(q_clean, search_type=type)
+            # Multi-field search traversing entire list
+            results, steps = storage_manager.linked_list.search_by_text(q_clean, field=type)
             return {
                 "query": q_clean,
                 "search_type": type,
-                "steps_taken": storage_manager.linked_list.count_books(),
+                "steps_taken": steps,
                 "traversal_path": [],
-                "results": matches,
-                "total_found": len(matches),
+                "results": results,
+                "total_found": len(results),
             }
 
 
-@app.get("/api/books/export")
+@api_router.get("/books/export")
 def export_books_csv():
     """
-    Exports the current Singly Linked List library catalog as a downloadable CSV.
-    Must be defined before parameterized /api/books/{isbn} route.
+    Traverses the Singly Linked List and exports all books as standard CSV format.
+    Streams directly to client.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         books = storage_manager.linked_list.display_books()
 
     output = io.StringIO()
@@ -201,76 +261,81 @@ def export_books_csv():
             b.get("availability_status", ""),
             b.get("issued_to", ""),
             b.get("added_at", ""),
-            b.get("description", ""),
+            b.get("description", "").replace("\n", " "),
         ])
 
-    csv_data = output.getvalue()
+    csv_content = output.getvalue()
     filename = f"librix_catalog_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
     return Response(
-        content=csv_data,
+        content=csv_content,
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@app.get("/api/books/{isbn}", response_model=BookResponse)
+@api_router.get("/books/{isbn}", response_model=BookResponse)
 def get_book_by_isbn(isbn: str):
     """
-    Finds an individual book by traversing the Singly Linked List for the ISBN.
+    Traverses linked list to find a single book by ISBN.
+    Returns 404 if not found.
     """
     with _storage_lock:
-        node, steps, _ = storage_manager.linked_list.search_book(isbn.strip())
-        if not node:
+        storage_manager.sync_if_needed()
+        node, steps, _ = storage_manager.linked_list.search_book(isbn)
+        if node is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with ISBN '{isbn}' not found in catalog."
+                detail=f"Book with ISBN '{isbn}' was not found after traversing {steps} nodes in the list.",
             )
         return node.to_dict()
 
 
-@app.put("/api/books/{isbn}", response_model=BookResponse)
-def update_book(isbn: str, update_in: BookUpdate):
+@api_router.put("/books/{isbn}", response_model=BookResponse)
+def update_book(isbn: str, book_update: BookUpdate):
     """
-    Updates book details in its Singly Linked List node and persists changes.
+    Updates mutable fields of a book node in place.
+    ISBN cannot be changed to preserve node key integrity.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
+        update_fields = {k: v for k, v in book_update.model_dump().items() if v is not None}
         try:
-            update_data = {k: v for k, v in update_in.model_dump().items() if v is not None}
-            node = storage_manager.linked_list.update_book(isbn.strip(), update_data)
+            node = storage_manager.linked_list.update_book(isbn, update_fields)
             storage_manager.persist_linked_list()
             storage_manager.log_activity(
                 action="book_updated",
-                details=f"Updated details for '{node.title}' (ISBN: {isbn}).",
+                details=f"Updated metadata for '{node.title}'.",
                 isbn=isbn,
             )
             return node.to_dict()
         except KeyError as ke:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ke))
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        except ValueError as ve:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
 
 
-@app.delete("/api/books/{isbn}", response_model=ApiResponse)
+@api_router.delete("/books/{isbn}", response_model=ApiResponse)
 def delete_book(isbn: str):
     """
-    Deletes a book node from the Singly Linked List.
-    Re-wires next pointers (handles head, middle, and tail nodes).
-    Refuses deletion if the book is currently issued.
+    Unlinks a book node by rewiring previous.next = current.next (or head = head.next).
+    CRITICAL: Rejects deletion if availability_status == 'Issued'.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         try:
-            deleted_info = storage_manager.linked_list.delete_book(isbn.strip())
+            deleted_result = storage_manager.linked_list.delete_book(isbn)
+            deleted_title = deleted_result.get("title", str(deleted_result)) if isinstance(deleted_result, dict) else str(deleted_result)
             storage_manager.persist_linked_list()
             storage_manager.log_activity(
                 action="book_deleted",
-                details=f"Removed '{deleted_info.get('title')}' (ISBN: {isbn}) from library catalog.",
+                details=f"Unlinked '{deleted_title}' (ISBN: {isbn}) from Singly Linked List.",
                 isbn=isbn,
             )
             return {
                 "success": True,
-                "message": f"Successfully deleted book '{deleted_info.get('title')}' (ISBN: {isbn}).",
-                "data": deleted_info,
+                "message": f"Successfully deleted '{deleted_title}' from the library catalog.",
+                "data": {"isbn": isbn, "title": deleted_title},
             }
         except KeyError as ke:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ke))
@@ -280,15 +345,16 @@ def delete_book(isbn: str):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@app.post("/api/books/{isbn}/issue", response_model=BookResponse)
+@api_router.post("/books/{isbn}/issue", response_model=BookResponse)
 def issue_book(isbn: str, req: IssueRequest):
     """
-    Marks a book as issued in its linked list node.
-    Verifies book is currently available and saves borrower name.
+    Issues an available book to a student.
+    Sets status to 'Issued' and records borrower's name on node.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         try:
-            node = storage_manager.linked_list.issue_book(isbn.strip(), req.student_name)
+            node = storage_manager.linked_list.issue_book(isbn, req.student_name)
             storage_manager.persist_linked_list()
             storage_manager.log_activity(
                 action="book_issued",
@@ -304,14 +370,16 @@ def issue_book(isbn: str, req: IssueRequest):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@app.post("/api/books/{isbn}/return", response_model=BookResponse)
+@api_router.post("/books/{isbn}/return", response_model=BookResponse)
 def return_book(isbn: str):
     """
-    Returns an issued book, resetting status to 'Available' in its linked list node.
+    Returns an issued book.
+    Resets status to 'Available' and clears issued_to on node.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         try:
-            node = storage_manager.linked_list.return_book(isbn.strip())
+            node = storage_manager.linked_list.return_book(isbn)
             storage_manager.persist_linked_list()
             storage_manager.log_activity(
                 action="book_returned",
@@ -327,13 +395,14 @@ def return_book(isbn: str):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@app.get("/api/dashboard/stats", response_model=DashboardStatsResponse)
+@api_router.get("/dashboard/stats", response_model=DashboardStatsResponse)
 def get_dashboard_stats():
     """
     Computes real-time dashboard statistics directly from linked list traversal.
     No hardcoded values.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         total = storage_manager.linked_list.count_books()
         available = storage_manager.linked_list.count_available_books()
         issued = storage_manager.linked_list.count_issued_books()
@@ -355,22 +424,24 @@ def get_dashboard_stats():
     }
 
 
-@app.get("/api/linked-list/visualize")
+@api_router.get("/linked-list/visualize")
 def get_linked_list_visualization():
     """
     Returns the real in-memory Singly Linked List sequence with pointers,
     HEAD marker, NULL tail marker, and algorithm time complexities.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         return storage_manager.linked_list.get_visualization_data()
 
 
-@app.get("/api/reports", response_model=ReportsResponse)
+@api_router.get("/reports", response_model=ReportsResponse)
 def get_reports_data():
     """
     Generates analytics report data directly from linked list traversals.
     """
     with _storage_lock:
+        storage_manager.sync_if_needed()
         total = storage_manager.linked_list.count_books()
         available = storage_manager.linked_list.count_available_books()
         issued = storage_manager.linked_list.count_issued_books()
@@ -392,8 +463,7 @@ def get_reports_data():
     }
 
 
-
-@app.post("/api/system/reset", response_model=ApiResponse)
+@api_router.post("/system/reset", response_model=ApiResponse)
 def reset_database():
     """
     Resets the catalog back to initial standard seed data.
@@ -410,3 +480,8 @@ def reset_database():
             "message": "Library catalog has been reset to default demo dataset.",
             "data": {"count": storage_manager.linked_list.count_books()},
         }
+
+
+# Mount API routes with /api prefix (primary) and without prefix (fallback alias for Vercel rewrites)
+app.include_router(api_router, prefix="/api")
+app.include_router(api_router, include_in_schema=False)
